@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS authors (
+    id INTEGER PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    affiliation VARCHAR(255),
+    sinta_url TEXT,
+    last_scraped_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
