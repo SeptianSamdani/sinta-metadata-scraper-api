@@ -29,6 +29,14 @@ export const up = (pgm) => {
       type: 'text',
       notNull: true
     },
+    publisher: { 
+      type: 'text', 
+      default: null 
+    },
+    citation_count: { 
+      type: 'integer', 
+      default: null 
+    }, 
     fetched_at: {
       type: 'timestamptz',
       notNull: true,

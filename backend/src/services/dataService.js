@@ -12,8 +12,12 @@ export const savePublications = async (publications, topic) => {
       if (!pub.doi) continue; // Skip if no DOI
 
       const query = `
-        INSERT INTO publications (doi, title, abstract, authors, publication_year, journal_title, search_topic)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        INSERT INTO publications (
+          doi, title, abstract, authors,
+          publication_year, journal_title,
+          search_topic, publisher, citation_count
+        )
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
         ON CONFLICT (doi) DO NOTHING
       `;
 
@@ -24,7 +28,9 @@ export const savePublications = async (publications, topic) => {
         JSON.stringify(pub.authors),
         pub.publication_year,
         pub.journal_title,
-        topic
+        topic,
+        pub.publisher,
+        pub.citation_count
       ]);
 
       if (result.rowCount > 0) inserted++;

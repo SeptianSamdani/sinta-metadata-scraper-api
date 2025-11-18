@@ -1,22 +1,28 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import SearchBar from './components/SearchBar';
 import TrendChart from './components/TrendChart';
 import KeywordChart from './components/KeywordChart';
 import ArticleTable from './components/ArticleTable';
-import ExportButton from './components/ExportButton'; // ← ADD THIS
+import ExportButton from './components/ExportButton';
 import { searchTopic, getDashboardData } from './services/api';
+import ArticleDetailModal from './components/ArticleDetailModal';
+import ArticleTableSkeleton from './components/ArticleTableSkeleton';
+
 
 function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [dashboardData, setDashboardData] = useState(null);
-  const [currentTopic, setCurrentTopic] = useState(''); // ← ADD THIS
+  const [currentTopic, setCurrentTopic] = useState('');
+  const [selectedArticle, setSelectedArticle] = useState(null);
 
   const handleSearch = async (topic) => {
     setLoading(true);
     setError(null);
     setDashboardData(null);
-    setCurrentTopic(topic); // ← ADD THIS
+    setCurrentTopic(topic);
+
+    localStorage.setItem("lastTopic", topic); // ← ADDED
 
     try {
       await searchTopic(topic);
@@ -27,7 +33,16 @@ function App() {
     } finally {
       setLoading(false);
     }
-  };
+}; 
+
+  useEffect(() => {
+  const savedTopic = localStorage.getItem("lastTopic");
+    if (savedTopic) {
+      if (confirm(`Load previous search: "${savedTopic}" ?`)) {
+        handleSearch(savedTopic);
+      }
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -38,7 +53,6 @@ function App() {
 
         <SearchBar onSearch={handleSearch} loading={loading} />
 
-        {/* ← ADD EXPORT BUTTON HERE */}
         {dashboardData && (
           <div className="mt-4 flex justify-end">
             <ExportButton 
@@ -55,9 +69,8 @@ function App() {
         )}
 
         {loading && (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Fetching data...</p>
+          <div className="mt-8">
+            <ArticleTableSkeleton />
           </div>
         )}
 
@@ -65,7 +78,17 @@ function App() {
           <div className="mt-8 space-y-8">
             <TrendChart data={dashboardData.trendData} />
             <KeywordChart data={dashboardData.keywords} />
-            <ArticleTable data={dashboardData.articles} />
+            <ArticleTable 
+              data={dashboardData.articles} 
+              onDetail={(a) => setSelectedArticle(a)}
+            />
+
+            {selectedArticle && (
+              <ArticleDetailModal 
+                article={selectedArticle} 
+                onClose={() => setSelectedArticle(null)} 
+              />
+            )}
           </div>
         )}
       </div>
